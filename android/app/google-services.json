@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "245018165430",
+    "project_id": "ogtaxi-9373a",
+    "storage_bucket": "ogtaxi-9373a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:245018165430:android:bb8aaf49440aff3af7a617",
+        "android_client_info": {
+          "package_name": "com.example.ogtaxi"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCMhLyDiiRr-G6al5tO9f9BqaZm3q6xzzA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

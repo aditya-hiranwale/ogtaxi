@@ -1,10 +1,15 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:ogtaxi/src/features/welcome/welc_screen.dart';
+// import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:ogtaxi/utils/theme/theme.dart';
 
 void main() async {
+  // WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  // FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   runApp(const MyApp());
 }
 
@@ -14,12 +19,13 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       title: 'OGTAXI',
       theme: KAppTheme.lightTheme,
       darkTheme: KAppTheme.darkTheme,
       themeMode: ThemeMode.system,
-      home: const MyHomePage(title: 'OGTAXI'),
+      // home: const MyHomePage(title: 'OGTAXI'),
+      home: const WelcomeScreen(),
     );
   }
 }

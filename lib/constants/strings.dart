@@ -1,5 +1,6 @@
 class KStrings {
   //generic texts
+  static const String appName = "OGTAXI";
   static const String login = "Login";
   static const String signup = "Signup";
   static const String fullName = "Full name";
@@ -12,7 +13,7 @@ class KStrings {
   static const String passConfirm = "Confirm password";
   static const String getOTP = "Get OTP";
   static const String verify = "Verify";
-  static const String sendOTP = "Send OTP";
+  static const String otpSent = "OTP Sent.";
   static const String model = "model";
 
   // welcome screen
@@ -26,4 +27,10 @@ class KStrings {
   // signup screen
   static const String signupTitle = "Register to OGTAXI";
   static const String signupSubtitle = "Signup and enjoy all the benefits.";
+
+  // frogot pass screen
+  static const String forgotPassTitle = "Forgot Password?";
+  static const String forgotPassSubtitle =
+      "Choose an option to recover your account.";
+  static const String recoverAcc = "Let's recover your account.";
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ogtaxi/common_widgets/form/form_header_widget.dart';
+import 'package:ogtaxi/src/features/home/view/home_screen.dart';
 import 'package:ogtaxi/src/features/signup/view/signup_screen.dart';
 
 import '../../../../constants/images.dart';
@@ -25,7 +26,7 @@ class LoginScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const FormHeaderWidget(
+            FormHeaderWidget(
               image: KImages.logoLarge,
               title: KStrings.loginTitle,
               subtitle: KStrings.loginSubtitle,
@@ -33,21 +34,6 @@ class LoginScreen extends StatelessWidget {
 
             //form
             const LoginFormWidget(),
-
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  //
-                  // Get.to(const LoginScreen());
-                },
-                child: Text(
-                  KStrings.login.toUpperCase(),
-                  textAlign: TextAlign.center,
-                  // style: Theme.of(context).textTheme.headlineLarge,
-                ),
-              ),
-            ),
 
             Column(
               crossAxisAlignment: CrossAxisAlignment.center,

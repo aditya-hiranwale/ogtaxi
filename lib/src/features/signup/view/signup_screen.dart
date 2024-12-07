@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:ogtaxi/src/features/login/view/login_screen.dart';
 
 import '../../../../common_widgets/form/form_header_widget.dart';
 import '../../../../constants/images.dart';
@@ -24,7 +26,7 @@ class SignupScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const FormHeaderWidget(
+              FormHeaderWidget(
                 image: KImages.logoLarge,
                 title: KStrings.signupTitle,
                 subtitle: KStrings.signupSubtitle,
@@ -32,21 +34,6 @@ class SignupScreen extends StatelessWidget {
 
               //form
               const SignupFormWidget(),
-
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    //
-                    // Get.to(const LoginScreen());
-                  },
-                  child: Text(
-                    KStrings.signup.toUpperCase(),
-                    textAlign: TextAlign.center,
-                    // style: Theme.of(context).textTheme.headlineLarge,
-                  ),
-                ),
-              ),
 
               Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -59,14 +46,18 @@ class SignupScreen extends StatelessWidget {
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(
-                      onPressed: () {},
+                      onPressed: () {
+                        //
+                      },
                       icon: const Icon(Icons.login_rounded),
                       label: const Text("Signup with google"),
                     ),
                   ),
                   Esb.height(KSizes.k14pad),
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Get.to(() => const LoginScreen());
+                    },
                     child: Text.rich(
                       TextSpan(
                           text: "Already have an account? ",

@@ -8,6 +8,7 @@ import 'package:ogtaxi/utils/theme/app_colors.dart';
 import '../../../constants/kdevice_info.dart';
 import '../../../extensions/esizedbox.dart';
 import '../login/view/login_screen.dart';
+import '../signup/view/signup_screen.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -62,7 +63,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 //
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      //
+                      Get.to(() => const SignupScreen());
+                    },
                     child: const Text(
                       KStrings.signup,
                       textAlign: TextAlign.center,

@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ogtaxi/repo/auth/auth_repo.dart';
 import 'package:ogtaxi/src/features/welcome/welc_screen.dart';
 // import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:ogtaxi/utils/theme/theme.dart';
@@ -8,7 +9,12 @@ import 'package:ogtaxi/utils/theme/theme.dart';
 void main() async {
   // WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await Firebase.initializeApp().then(
+    //executes everytime app launches and redirects to appropriate screen
+    (value) => Get.put(
+      AuthRepo(),
+    ),
+  );
   // FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   runApp(const MyApp());
 }
@@ -26,6 +32,8 @@ class MyApp extends StatelessWidget {
       themeMode: ThemeMode.system,
       // home: const MyHomePage(title: 'OGTAXI'),
       home: const WelcomeScreen(),
+      defaultTransition: Transition.leftToRightWithFade,
+      transitionDuration: const Duration(milliseconds: 500),
     );
   }
 }

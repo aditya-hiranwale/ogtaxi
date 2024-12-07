@@ -6,11 +6,13 @@ import '../../extensions/esizedbox.dart';
 
 class FormHeaderWidget extends StatelessWidget {
   final String image, title, subtitle;
-  const FormHeaderWidget({
+  double? imgHeight;
+  FormHeaderWidget({
     super.key,
     required this.image,
     required this.title,
     required this.subtitle,
+    this.imgHeight,
   });
 
   @override
@@ -21,9 +23,11 @@ class FormHeaderWidget extends StatelessWidget {
         Image(
           image: AssetImage(image),
           // width: getDeviceWidth(context) / 1.1,
-          height: getDeviceHeight(context) / 4,
+          height: imgHeight ?? getDeviceHeight(context) / 4,
+          fit: BoxFit.fill,
           alignment: Alignment.center,
         ),
+        Esb.height(KSizes.k14pad),
         Text(
           title,
           style: Theme.of(context).textTheme.headlineLarge,

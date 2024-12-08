@@ -11,12 +11,19 @@ class LoginCtlr extends GetxController {
   final TextEditingController phoneCtlr = TextEditingController();
   final TextEditingController passCtlr = TextEditingController();
 
-  //register user
+  //login user
   void loginUser(String email, String pass) {
     //
     AuthRepo.instance.loginUserWithEmailAndPass(
       email,
       pass,
     );
+  }
+
+  //google login
+  void loginWithGoogle() async {
+    //
+    await AuthRepo.instance.signinWithGoogle();
+    AuthRepo.instance.setInitialScreen(AuthRepo.instance.firebaseUser.value);
   }
 }

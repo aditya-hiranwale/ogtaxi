@@ -12,7 +12,20 @@
           "package_name": "com.example.ogtaxi"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "245018165430-ej1ebdsjogjrhdbgmngiccj4buvql4ff.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.ogtaxi",
+            "certificate_hash": "225d0a5ac3fb738aa2a33827c3eb70ed0eab4a56"
+          }
+        },
+        {
+          "client_id": "245018165430-i4s2nppimri774pmclnub23abjmg3nqu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCMhLyDiiRr-G6al5tO9f9BqaZm3q6xzzA"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "245018165430-i4s2nppimri774pmclnub23abjmg3nqu.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

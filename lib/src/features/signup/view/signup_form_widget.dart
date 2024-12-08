@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ogtaxi/src/features/accrecovery/view/otp_verify_screen.dart';
 import 'package:ogtaxi/src/features/signup/controller/signup.dart';
 
 import '../../../../constants/sizes.dart';
@@ -11,6 +10,24 @@ class SignupFormWidget extends StatelessWidget {
   const SignupFormWidget({
     super.key,
   });
+
+  String? validateUserEmail(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'This field is required';
+    } else if (!RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$')
+        .hasMatch(value)) {
+      return 'Enter a valid email address';
+    }
+    return null;
+  }
+
+  String? validateField(String? value) {
+    if (value!.isEmpty) {
+      return 'This field is required';
+    }
+    // Add more  validation logic if needed
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +43,7 @@ class SignupFormWidget extends StatelessWidget {
             //
             TextFormField(
               controller: ctlr.fullNameCtlr,
+              validator: validateField,
               decoration: const InputDecoration(
                 prefixIcon: Icon(Icons.perm_identity_rounded),
                 labelText: KStrings.fullName,
@@ -35,6 +53,7 @@ class SignupFormWidget extends StatelessWidget {
             Esb.height(KSizes.k14pad),
             TextFormField(
               controller: ctlr.emailCtlr,
+              validator: validateUserEmail,
               decoration: const InputDecoration(
                 prefixIcon: Icon(Icons.person),
                 labelText: KStrings.email,
@@ -44,6 +63,7 @@ class SignupFormWidget extends StatelessWidget {
             Esb.height(KSizes.k14pad),
             TextFormField(
               controller: ctlr.phoneCtlr,
+              validator: validateField,
               keyboardType: TextInputType.number,
               decoration: const InputDecoration(
                 prefixIcon: Icon(Icons.phone),
@@ -54,6 +74,7 @@ class SignupFormWidget extends StatelessWidget {
             Esb.height(KSizes.k14pad),
             TextFormField(
               controller: ctlr.passCtlr,
+              validator: validateField,
               decoration: InputDecoration(
                 prefixIcon: const Icon(Icons.password),
                 labelText: KStrings.pass,
@@ -67,6 +88,7 @@ class SignupFormWidget extends StatelessWidget {
             Esb.height(KSizes.k14pad),
             TextFormField(
               controller: ctlr.confirmPassCtlr,
+              validator: validateField,
               decoration: InputDecoration(
                 prefixIcon: const Icon(Icons.password),
                 labelText: KStrings.passConfirm,
@@ -84,12 +106,13 @@ class SignupFormWidget extends StatelessWidget {
                 onPressed: () {
                   //
                   if (formkey.currentState!.validate()) {
-                    //
-                    // ctlr.registerUser(ctlr.emailCtlr.text.trim(),
-                    //     ctlr.confirmPassCtlr.text.trim());
+                    //signup user
+                    ctlr.registerUser(ctlr.emailCtlr.text.trim(),
+                        ctlr.confirmPassCtlr.text.trim());
 
-                    ctlr.userPhoneAuth(ctlr.phoneCtlr.text.trim());
-                    Get.to(() => const OTPScreen());
+                    //verify user phone (billing needed to run)
+                    // ctlr.userPhoneAuth(ctlr.phoneCtlr.text.trim());
+                    // Get.to(() => const OTPScreen());
                   }
                 },
                 child: Text(

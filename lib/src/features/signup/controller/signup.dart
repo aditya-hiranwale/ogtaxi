@@ -22,6 +22,12 @@ class SignupCtlr extends GetxController {
     );
   }
 
+  //email auth
+  void userEmailAuth(String email) {
+    //
+    AuthRepo.instance.emailAuth();
+  }
+
   //phone auth
   void userPhoneAuth(String phone) {
     //

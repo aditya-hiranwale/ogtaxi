@@ -6,13 +6,29 @@ import 'package:ogtaxi/src/features/login/view/forgotpass_modal.dart';
 import '../../../../constants/sizes.dart';
 import '../../../../constants/strings.dart';
 import '../../../../extensions/esizedbox.dart';
-import '../../home/view/home_screen.dart';
-import '../../signup/controller/signup.dart';
 
 class LoginFormWidget extends StatelessWidget {
   const LoginFormWidget({
     super.key,
   });
+
+  String? validateUserEmail(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'This field is required';
+    } else if (!RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$')
+        .hasMatch(value)) {
+      return 'Enter a valid email address';
+    }
+    return null;
+  }
+
+  String? validateField(String? value) {
+    if (value!.isEmpty) {
+      return 'This field is required';
+    }
+    // Add more  validation logic if needed
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +43,7 @@ class LoginFormWidget extends StatelessWidget {
             //
             TextFormField(
               controller: ctlr.emailCtlr,
+              validator: validateUserEmail,
               decoration: const InputDecoration(
                 prefixIcon: Icon(Icons.person),
                 labelText: KStrings.email,
@@ -37,6 +54,7 @@ class LoginFormWidget extends StatelessWidget {
             Esb.height(KSizes.k14pad),
             TextFormField(
               controller: ctlr.passCtlr,
+              validator: validateField,
               decoration: InputDecoration(
                 prefixIcon: const Icon(Icons.password),
                 labelText: KStrings.pass,

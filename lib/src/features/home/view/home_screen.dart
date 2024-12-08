@@ -4,9 +4,9 @@ import 'package:ogtaxi/constants/sizes.dart';
 import 'package:ogtaxi/constants/strings.dart';
 import 'package:ogtaxi/extensions/esizedbox.dart';
 import 'package:ogtaxi/repo/auth/auth_repo.dart';
+import 'package:ogtaxi/src/features/home/controller/home.dart';
 import 'package:ogtaxi/utils/theme/app_colors.dart';
 
-import '../../signup/controller/signup.dart';
 import 'search_taxi_widget.dart';
 import 'taxi_card_widget.dart';
 
@@ -18,58 +18,11 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final List<Map<String, dynamic>> taxis = [
-    {
-      'imageUrl': 'https://via.placeholder.com/80',
-      'taxiName': 'Goa Cab',
-      'isAvailable': true,
-      'taxiType': 'Sedan',
-      'location': 'Panaji',
-      'pricePerKm': 15.0,
-    },
-    {
-      'imageUrl': 'https://via.placeholder.com/80',
-      'taxiName': 'Beach Ride',
-      'isAvailable': false,
-      'taxiType': 'SUV',
-      'location': 'Calangute',
-      'pricePerKm': 20.0,
-    },
-    {
-      'imageUrl': 'https://via.placeholder.com/80',
-      'taxiName': 'Goa Cab',
-      'isAvailable': true,
-      'taxiType': 'Sedan',
-      'location': 'Panaji',
-      'pricePerKm': 15.0,
-    },
-    {
-      'imageUrl': 'https://via.placeholder.com/80',
-      'taxiName': 'Beach Ride',
-      'isAvailable': false,
-      'taxiType': 'SUV',
-      'location': 'Calangute',
-      'pricePerKm': 20.0,
-    },
-    {
-      'imageUrl': 'https://via.placeholder.com/80',
-      'taxiName': 'Goa Cab',
-      'isAvailable': true,
-      'taxiType': 'Sedan',
-      'location': 'Panaji',
-      'pricePerKm': 15.0,
-    },
-    {
-      'imageUrl': 'https://via.placeholder.com/80',
-      'taxiName': 'Beach Ride',
-      'isAvailable': false,
-      'taxiType': 'SUV',
-      'location': 'Calangute',
-      'pricePerKm': 20.0,
-    },
-  ];
   @override
   Widget build(BuildContext context) {
+    final ctlr = Get.put(HomeCtlr());
+
+    final List<Map<String, dynamic>> taxis;
     var txtTheme = Theme.of(context).textTheme;
     return Scaffold(
       appBar: AppBar(
@@ -149,22 +102,28 @@ class _HomeScreenState extends State<HomeScreen> {
               const SearchTaxi(),
 
               //search results
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: taxis.length,
-                itemBuilder: (context, index) {
-                  final taxi = taxis[index];
-                  return TaxiCard(
-                    imageUrl: taxi['imageUrl'],
-                    taxiName: taxi['taxiName'],
-                    isAvailable: taxi['isAvailable'],
-                    taxiType: taxi['taxiType'],
-                    location: taxi['location'],
-                    pricePerKm: taxi['pricePerKm'],
-                  );
-                },
-              ),
+              // Search Results
+              Obx(() {
+                final filteredTaxis = ctlr.filterTaxis(ctlr.taxis);
+                return filteredTaxis.isEmpty
+                    ? const Center(child: Text('No results found.'))
+                    : ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: filteredTaxis.length,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemBuilder: (context, index) {
+                          final taxi = filteredTaxis[index];
+                          return TaxiCard(
+                            imageUrl: taxi['imageUrl'],
+                            taxiName: taxi['taxiName'],
+                            isAvailable: taxi['isAvailable'],
+                            taxiType: taxi['taxiType'],
+                            location: taxi['location'],
+                            pricePerKm: taxi['pricePerKm'],
+                          );
+                        },
+                      );
+              }),
             ],
           ),
         ),

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ogtaxi/common_widgets/form/form_header_widget.dart';
-import 'package:ogtaxi/src/features/home/view/home_screen.dart';
+import 'package:ogtaxi/repo/auth/auth_repo.dart';
+import 'package:ogtaxi/src/features/login/controller/login.dart';
 import 'package:ogtaxi/src/features/signup/view/signup_screen.dart';
 
 import '../../../../constants/images.dart';
@@ -46,7 +47,10 @@ class LoginScreen extends StatelessWidget {
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton.icon(
-                    onPressed: () {},
+                    onPressed: () {
+                      //
+                      LoginCtlr.instance.loginWithGoogle();
+                    },
                     icon: const Icon(Icons.login),
                     label: const Text("Login with google"),
                   ),

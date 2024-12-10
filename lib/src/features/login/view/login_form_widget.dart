@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ogtaxi/common_widgets/form/loading_widget.dart';
 import 'package:ogtaxi/src/features/login/controller/login.dart';
 import 'package:ogtaxi/src/features/login/view/forgotpass_modal.dart';
 
@@ -52,20 +53,31 @@ class LoginFormWidget extends StatelessWidget {
               ),
             ),
             Esb.height(KSizes.k14pad),
-            TextFormField(
-              controller: ctlr.passCtlr,
-              validator: validateField,
-              decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.password),
-                labelText: KStrings.pass,
-                hintText: KStrings.pass,
-                border: const OutlineInputBorder(),
-                suffixIcon: IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.remove_red_eye_outlined),
+            Obx(() {
+              return
+                  //
+                  TextFormField(
+                controller: ctlr.passCtlr,
+                validator: validateField,
+                obscureText: ctlr.obscureTxt.value,
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Icons.password),
+                  labelText: KStrings.pass,
+                  hintText: KStrings.pass,
+                  border: const OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    onPressed: () {
+                      ctlr.toggleObscureText();
+                    },
+                    icon: Icon(
+                      ctlr.obscureTxt.value
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                    ),
+                  ),
                 ),
-              ),
-            ),
+              );
+            }),
             Esb.height(KSizes.k14pad),
             Align(
               alignment: Alignment.bottomRight,
@@ -79,25 +91,29 @@ class LoginFormWidget extends StatelessWidget {
             ),
             Esb.height(KSizes.k14pad),
 
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  //
-                  if (formkey.currentState!.validate()) {
-                    //
-                    ctlr.loginUser(
-                      ctlr.emailCtlr.text.trim(),
-                      ctlr.passCtlr.text.trim(),
-                    );
-                  }
-                },
-                child: Text(
-                  KStrings.submit.toUpperCase(),
-                  textAlign: TextAlign.center,
-                  // style: Theme.of(context).textTheme.headlineLarge,
-                ),
-              ),
+            Obx(
+              () => ctlr.isloading.value
+                  ? const LoadingButton()
+                  : SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          //
+                          if (formkey.currentState!.validate()) {
+                            //
+                            ctlr.loginUser(
+                              ctlr.emailCtlr.text.trim(),
+                              ctlr.passCtlr.text.trim(),
+                            );
+                          }
+                        },
+                        child: Text(
+                          KStrings.submit.toUpperCase(),
+                          textAlign: TextAlign.center,
+                          // style: Theme.of(context).textTheme.headlineLarge,
+                        ),
+                      ),
+                    ),
             ),
           ],
         ),

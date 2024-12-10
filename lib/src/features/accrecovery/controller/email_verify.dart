@@ -1,5 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:get/get.dart';
 import 'package:ogtaxi/repo/auth/auth_repo.dart';
 
@@ -13,6 +12,14 @@ class EmailVerifyCtlr extends GetxController {
   //
   static EmailVerifyCtlr get instance => Get.find();
 
+  final isloading = false.obs;
+
+  //toggle loading
+  void toggleLoading() {
+    isloading.value = !isloading.value;
+    // update();
+  }
+
   //email auth
   void sendEmailVerification() async {
     //
@@ -21,6 +28,7 @@ class EmailVerifyCtlr extends GetxController {
   }
 
   void checkIfEmailVerified() async {
+    toggleLoading();
     //
     await FirebaseAuth.instance.currentUser?.reload();
     final user = FirebaseAuth.instance.currentUser;
@@ -28,5 +36,6 @@ class EmailVerifyCtlr extends GetxController {
       //
       AuthRepo.instance.setInitialScreen(user);
     }
+    toggleLoading();
   }
 }

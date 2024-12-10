@@ -5,8 +5,10 @@ class TaxiCard extends StatelessWidget {
   final String taxiName;
   final bool isAvailable;
   final String taxiType;
-  final String location;
+  final String startLoc;
+  final String endLoc;
   final double pricePerKm;
+  final double rating;
 
   const TaxiCard({
     super.key,
@@ -14,14 +16,17 @@ class TaxiCard extends StatelessWidget {
     required this.taxiName,
     required this.isAvailable,
     required this.taxiType,
-    required this.location,
+    required this.startLoc,
+    required this.endLoc,
     required this.pricePerKm,
+    required this.rating,
   });
 
   @override
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+      color: Colors.grey.shade100,
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Row(
@@ -39,16 +44,41 @@ class TaxiCard extends StatelessWidget {
                   Text(taxiName,
                       style: const TextStyle(
                           fontSize: 18, fontWeight: FontWeight.bold)),
-                  Text('$taxiType • $location',
+                  // Taxi Type, Start Location, End Location
+                  Text('$taxiType • $startLoc to $endLoc',
                       style: TextStyle(color: Colors.grey[600])),
                   Text('₹${pricePerKm.toStringAsFixed(2)} per km',
                       style: const TextStyle(color: Colors.green)),
                 ],
               ),
             ),
-            Icon(isAvailable ? Icons.check_circle : Icons.cancel,
-                color: isAvailable ? Colors.green : Colors.red),
+            AvailabilityBadge(isAvailable: isAvailable),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class AvailabilityBadge extends StatelessWidget {
+  final bool isAvailable;
+
+  const AvailabilityBadge({super.key, required this.isAvailable});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+      decoration: BoxDecoration(
+        color: isAvailable ? Colors.green : Colors.red,
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      child: Text(
+        isAvailable ? 'Available' : 'In Service',
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 12.0,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );

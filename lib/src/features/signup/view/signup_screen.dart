@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ogtaxi/src/features/login/view/login_screen.dart';
+import 'package:ogtaxi/src/features/signup/controller/signup.dart';
 
 import '../../../../common_widgets/form/form_header_widget.dart';
+import '../../../../common_widgets/form/loading_widget.dart';
 import '../../../../constants/images.dart';
 import '../../../../constants/kdevice_info.dart';
 import '../../../../constants/sizes.dart';
@@ -16,6 +18,7 @@ class SignupScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ctlr = Get.put(SignupCtlr());
     final isDark = getThemeMode(context);
     return Scaffold(
       backgroundColor: isDark ? KColors.primeDark : KColors.primeLight,
@@ -25,6 +28,7 @@ class SignupScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
               FormHeaderWidget(
                 image: KImages.logoLarge,
@@ -33,7 +37,9 @@ class SignupScreen extends StatelessWidget {
               ),
 
               //form
-              const SignupFormWidget(),
+              SignupFormWidget(
+                ctlr: ctlr,
+              ),
 
               Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -43,16 +49,19 @@ class SignupScreen extends StatelessWidget {
                     padding: EdgeInsets.symmetric(vertical: 8.0),
                     child: Text("OR"),
                   ),
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        //
-                      },
-                      icon: const Icon(Icons.login_rounded),
-                      label: const Text("Signup with google"),
-                    ),
-                  ),
+                  ctlr.isloading.value
+                      ? const LoadingButton()
+                      : SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton.icon(
+                            onPressed: () {
+                              //
+                              // ctlr.registerUser("email", "pass");
+                            },
+                            icon: const Icon(Icons.login_rounded),
+                            label: const Text("Signup with google"),
+                          ),
+                        ),
                   Esb.height(KSizes.k14pad),
                   TextButton(
                     onPressed: () {

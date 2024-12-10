@@ -5,6 +5,7 @@ import 'package:ogtaxi/constants/strings.dart';
 import 'package:ogtaxi/extensions/esizedbox.dart';
 import 'package:ogtaxi/repo/auth/auth_repo.dart';
 import 'package:ogtaxi/src/features/home/controller/home.dart';
+import 'package:ogtaxi/src/features/home/view/most_searched_widget.dart';
 import 'package:ogtaxi/utils/theme/app_colors.dart';
 
 import 'search_taxi_widget.dart';
@@ -22,7 +23,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final ctlr = Get.put(HomeCtlr());
 
-    final List<Map<String, dynamic>> taxis;
     var txtTheme = Theme.of(context).textTheme;
     return Scaffold(
       appBar: AppBar(
@@ -36,7 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
         elevation: 0,
         actions: [
           CircleAvatar(
-            radius: 44,
+            radius: 24,
             backgroundColor: KColors.medianColor,
             // foregroundImage: AssetImage(KImages.logoSmall),
             child: IconButton(
@@ -76,33 +76,29 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(KSizes.k14pad),
-        child: SingleChildScrollView(
-          child: Column(
+      body: ListView(
+        shrinkWrap: true,
+        padding: const EdgeInsets.all(KSizes.k8pad),
+        children: [
+          Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
               Esb.height(KSizes.k18pad),
-              //
-              Text(
-                "Hi, John.",
-                style: txtTheme.headlineMedium,
-              ),
+              Text("Hi, John.", style: txtTheme.headlineMedium),
               Esb.height(KSizes.k4pad),
-              Text(
-                "Enter locations to see taxis",
-                style: txtTheme.headlineSmall,
-              ),
-
-              //locations card
-              // const Spacer(),
+              Text("Enter locations to see taxis", style: txtTheme.bodyLarge),
               Esb.height(KSizes.k16pad),
-              const SearchTaxi(),
-
-              //search results
-              // Search Results
+              Text("Most Searched", style: txtTheme.bodyMedium),
+              Esb.height(KSizes.k4pad),
+              SizedBox(
+                height: 64,
+                child: MostSearchedWidget(ctlr: ctlr),
+              ),
+              Esb.height(KSizes.k8pad),
+              SearchTaxi(ctlr: ctlr),
+              Esb.height(KSizes.k8pad),
               Obx(() {
                 final filteredTaxis = ctlr.filterTaxis(ctlr.taxis);
                 return filteredTaxis.isEmpty
@@ -114,19 +110,24 @@ class _HomeScreenState extends State<HomeScreen> {
                         itemBuilder: (context, index) {
                           final taxi = filteredTaxis[index];
                           return TaxiCard(
-                            imageUrl: taxi['imageUrl'],
-                            taxiName: taxi['taxiName'],
-                            isAvailable: taxi['isAvailable'],
-                            taxiType: taxi['taxiType'],
-                            location: taxi['location'],
-                            pricePerKm: taxi['pricePerKm'],
+                            imageUrl: taxi['imageUrl'] ??
+                                'https://via.placeholder.com/80',
+                            taxiName: taxi['taxiName'] ?? 'Unknown Taxi',
+                            isAvailable: taxi['isAvailable'] ?? false,
+                            taxiType: taxi['taxiType'] ?? 'Unknown Type',
+                            pricePerKm: taxi['pricePerKm'] ?? 0.0,
+                            startLoc: taxi['startLoc'] ?? 'Unknown',
+                            endLoc: taxi['endLoc'] ?? 'Unknown',
+                            rating: double.tryParse(
+                                    taxi['rating']?.toString() ?? '0.0') ??
+                                0.0,
                           );
                         },
                       );
               }),
             ],
           ),
-        ),
+        ],
       ),
     );
   }

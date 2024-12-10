@@ -1,7 +1,7 @@
 class SignupFailure {
   final String message;
 
-  const SignupFailure([this.message = "An unknown error occured."]);
+  const SignupFailure([this.message = "An Error occured."]);
 
   factory SignupFailure.code(String code) {
     switch (code) {

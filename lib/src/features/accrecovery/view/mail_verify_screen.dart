@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ogtaxi/src/features/accrecovery/controller/email_verify.dart';
+import 'package:ogtaxi/src/features/login/view/login_screen.dart';
 
 import '../../../../common_widgets/form/form_header_widget.dart';
+import '../../../../common_widgets/form/loading_widget.dart';
 import '../../../../constants/images.dart';
 import '../../../../constants/kdevice_info.dart';
 import '../../../../constants/sizes.dart';
@@ -34,18 +36,36 @@ class EmailVerifyScreen extends StatelessWidget {
                   "After clicking on the link in email press continue button below",
             ),
 
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
+            Obx(
+              () => ctlr.isloading.value
+                  ? const LoadingButton()
+                  : SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          //
+                          // Get.to(const LoginScreen());
+                          ctlr.checkIfEmailVerified();
+                        },
+                        child: const Text(
+                          "Continue",
+                          textAlign: TextAlign.center,
+                          // style: Theme.of(context).textTheme.headlineLarge,
+                        ),
+                      ),
+                    ),
+            ),
+
+            //
+            Center(
+              child: TextButton(
                 onPressed: () {
                   //
-                  // Get.to(const LoginScreen());
-                  ctlr.checkIfEmailVerified();
+                  Get.offAll(() => const LoginScreen());
                 },
-                child: const Text(
-                  "Continue",
-                  textAlign: TextAlign.center,
-                  // style: Theme.of(context).textTheme.headlineLarge,
+                child: Text(
+                  "Back to Login",
+                  style: Theme.of(context).textTheme.bodyLarge,
                 ),
               ),
             ),

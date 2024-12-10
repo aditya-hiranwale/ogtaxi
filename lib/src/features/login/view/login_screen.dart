@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ogtaxi/common_widgets/form/form_header_widget.dart';
-import 'package:ogtaxi/repo/auth/auth_repo.dart';
+import 'package:ogtaxi/common_widgets/form/loading_widget.dart';
 import 'package:ogtaxi/src/features/login/controller/login.dart';
 import 'package:ogtaxi/src/features/signup/view/signup_screen.dart';
 
@@ -20,6 +20,7 @@ class LoginScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = getThemeMode(context);
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: isDark ? KColors.primeDark : KColors.primeLight,
       body: Padding(
         padding: const EdgeInsets.all(KSizes.k14pad),
@@ -36,42 +37,46 @@ class LoginScreen extends StatelessWidget {
             //form
             const LoginFormWidget(),
 
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                //
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 8.0),
-                  child: Text("OR"),
-                ),
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: () {
-                      //
-                      LoginCtlr.instance.loginWithGoogle();
-                    },
-                    icon: const Icon(Icons.login),
-                    label: const Text("Login with google"),
-                  ),
-                ),
-                Esb.height(KSizes.k14pad),
-                TextButton(
-                  onPressed: () {
-                    //
-                    Get.to(() => const SignupScreen());
-                  },
-                  child: Text.rich(
-                    TextSpan(
-                        text: "Don't have an account? ",
-                        style: Theme.of(context).textTheme.bodyLarge,
-                        children: const [
-                          //
-                          TextSpan(text: KStrings.signup),
-                        ]),
-                  ),
-                ),
-              ],
+            Obx(
+              () => LoginCtlr.instance.isloading.value
+                  ? const LoadingButton()
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        //
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8.0),
+                          child: Text("OR"),
+                        ),
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton.icon(
+                            onPressed: () {
+                              //
+                              LoginCtlr.instance.loginWithGoogle();
+                            },
+                            icon: const Icon(Icons.login),
+                            label: const Text("Login with google"),
+                          ),
+                        ),
+                        Esb.height(KSizes.k14pad),
+                        TextButton(
+                          onPressed: () {
+                            //
+                            Get.to(() => const SignupScreen());
+                          },
+                          child: Text.rich(
+                            TextSpan(
+                                text: "Don't have an account? ",
+                                style: Theme.of(context).textTheme.bodyLarge,
+                                children: const [
+                                  //
+                                  TextSpan(text: KStrings.signup),
+                                ]),
+                          ),
+                        ),
+                      ],
+                    ),
             ),
           ],
         ),

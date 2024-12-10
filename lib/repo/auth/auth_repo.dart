@@ -43,14 +43,35 @@ class AuthRepo extends GetxController {
       //     ? Get.offAll(() => const WelcomeScreen())
       //     : Get.offAll(() => const HomeScreen());
       setInitialScreen(firebaseUser.value);
+      Get.snackbar(
+        "Signup successfull!", // Title of the snackbar
+        "Welcome to OGTAXI.", // Message to be displayed
+        snackPosition: SnackPosition.BOTTOM,
+        duration:
+            const Duration(seconds: 3), // Duration to display the snackbar
+      );
     } on FirebaseAuthException catch (e) {
       log('Exception in create user, ${e.code}');
       final ex = SignupFailure.code(e.code);
       log('Processed Exception, ${ex.message}');
+      Get.snackbar(
+        ex.message, // Title of the snackbar
+        e.code, // Message to be displayed
+        snackPosition: SnackPosition.BOTTOM,
+        duration:
+            const Duration(seconds: 3), // Duration to display the snackbar
+      );
       throw ex;
     } catch (_) {
       const ex = SignupFailure();
       log('Normal Exception, ${ex.message}');
+      Get.snackbar(
+        ex.message, // Title of the snackbar
+        ex.message, // Message to be displayed
+        snackPosition: SnackPosition.BOTTOM,
+        duration:
+            const Duration(seconds: 3), // Duration to display the snackbar
+      );
       throw ex;
     }
   }
@@ -63,14 +84,35 @@ class AuthRepo extends GetxController {
       //     ? Get.offAll(() => const WelcomeScreen())
       //     : Get.offAll(() => const HomeScreen());
       setInitialScreen(firebaseUser.value);
+      Get.snackbar(
+        "Login successfull!", // Title of the snackbar
+        "Welcome to OGTAXI.", // Message to be displayed
+        snackPosition: SnackPosition.BOTTOM,
+        duration:
+            const Duration(seconds: 3), // Duration to display the snackbar
+      );
     } on FirebaseAuthException catch (e) {
-      log('Exception in create user, ${e.code}');
+      log('Exception in login user, ${e.code}');
       final ex = SignupFailure.code(e.code);
       log('Processed Exception, ${ex.message}');
+      Get.snackbar(
+        ex.message, // Title of the snackbar
+        e.code, // Message to be displayed
+        snackPosition: SnackPosition.BOTTOM,
+        duration:
+            const Duration(seconds: 3), // Duration to display the snackbar
+      );
       throw ex;
     } catch (_) {
       const ex = SignupFailure();
       log('Normal Exception, ${ex.message}');
+      Get.snackbar(
+        ex.message, // Title of the snackbar
+        ex.message, // Message to be displayed
+        snackPosition: SnackPosition.BOTTOM,
+        duration:
+            const Duration(seconds: 3), // Duration to display the snackbar
+      );
       throw ex;
     }
   }
@@ -87,6 +129,13 @@ class AuthRepo extends GetxController {
         accessToken: googleAuth?.accessToken,
         idToken: googleAuth?.idToken,
       );
+      Get.snackbar(
+        "Signup successfull!", // Title of the snackbar
+        "Welcome to OGTAXI.", // Message to be displayed
+        snackPosition: SnackPosition.BOTTOM,
+        duration:
+            const Duration(seconds: 3), // Duration to display the snackbar
+      );
 
       //after signin, return creds
       return await FirebaseAuth.instance.signInWithCredential(credential);
@@ -94,10 +143,24 @@ class AuthRepo extends GetxController {
       log('Exception in create user, ${e.code}');
       final ex = SignupFailure.code(e.code);
       log('Processed Exception, ${ex.message}');
+      Get.snackbar(
+        ex.message, // Title of the snackbar
+        e.code, // Message to be displayed
+        snackPosition: SnackPosition.BOTTOM,
+        duration:
+            const Duration(seconds: 3), // Duration to display the snackbar
+      );
       throw ex;
-    } catch (_) {
+    } catch (e) {
       const ex = SignupFailure();
       log('Normal Exception, ${ex.message}');
+      Get.snackbar(
+        ex.message, // Title of the snackbar
+        e.toString(), // Message to be displayed
+        snackPosition: SnackPosition.BOTTOM,
+        duration:
+            const Duration(seconds: 3), // Duration to display the snackbar
+      );
       throw ex;
     }
   }
@@ -111,14 +174,35 @@ class AuthRepo extends GetxController {
       //     ? Get.offAll(() => const WelcomeScreen())
       //     : Get.offAll(() => const HomeScreen());
       setInitialScreen(firebaseUser.value);
+      Get.snackbar(
+        "Verification successfull!", // Title of the snackbar
+        "You'r email is verified sucessfully.", // Message to be displayed
+        snackPosition: SnackPosition.BOTTOM,
+        duration:
+            const Duration(seconds: 3), // Duration to display the snackbar
+      );
     } on FirebaseAuthException catch (e) {
       log('Exception in  email verif, ${e.code}');
       final ex = SignupFailure.code(e.code);
       log('Processed Exception, ${ex.message}');
+      Get.snackbar(
+        ex.message, // Title of the snackbar
+        e.code, // Message to be displayed
+        snackPosition: SnackPosition.BOTTOM,
+        duration:
+            const Duration(seconds: 3), // Duration to display the snackbar
+      );
       throw ex;
     } catch (_) {
       const ex = SignupFailure();
       log('Normal Exception, ${ex.message}');
+      Get.snackbar(
+        ex.message, // Title of the snackbar
+        ex.message, // Message to be displayed
+        snackPosition: SnackPosition.BOTTOM,
+        duration:
+            const Duration(seconds: 3), // Duration to display the snackbar
+      );
       throw ex;
     }
   }

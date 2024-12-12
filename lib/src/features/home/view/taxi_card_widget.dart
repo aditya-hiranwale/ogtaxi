@@ -1,25 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:ogtaxi/src/features/home/model/taxilist_model.dart';
 
 class TaxiCard extends StatelessWidget {
-  final String imageUrl;
-  final String taxiName;
-  final bool isAvailable;
-  final String taxiType;
-  final String startLoc;
-  final String endLoc;
-  final double pricePerKm;
-  final double rating;
+  final TaxiListModel item;
 
   const TaxiCard({
     super.key,
-    required this.imageUrl,
-    required this.taxiName,
-    required this.isAvailable,
-    required this.taxiType,
-    required this.startLoc,
-    required this.endLoc,
-    required this.pricePerKm,
-    required this.rating,
+    required this.item,
   });
 
   @override
@@ -27,34 +15,76 @@ class TaxiCard extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
       color: Colors.grey.shade100,
+      elevation: 4.0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12.0),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Row(
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8.0),
-              child: Image.network(imageUrl,
-                  height: 80, width: 80, fit: BoxFit.cover),
-            ),
+            _buildTaxiImage(),
             const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(taxiName,
-                      style: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.bold)),
-                  // Taxi Type, Start Location, End Location
-                  Text('$taxiType • $startLoc to $endLoc',
-                      style: TextStyle(color: Colors.grey[600])),
-                  Text('₹${pricePerKm.toStringAsFixed(2)} per km',
-                      style: const TextStyle(color: Colors.green)),
-                ],
-              ),
-            ),
-            AvailabilityBadge(isAvailable: isAvailable),
+            _buildTaxiDetails(context),
+            AvailabilityBadge(isAvailable: item.isAvailable),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildTaxiImage() {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8.0),
+      child: CachedNetworkImage(
+        imageUrl: item.taxiImg,
+        height: 80,
+        width: 80,
+        fit: BoxFit.cover,
+        placeholder: (context, url) => const SizedBox(
+          height: 80,
+          width: 80,
+          child: Center(child: CircularProgressIndicator()),
+        ),
+        errorWidget: (context, url, error) => Container(
+          height: 80,
+          width: 80,
+          color: Colors.grey.shade300,
+          child: const Icon(Icons.broken_image, size: 40, color: Colors.grey),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTaxiDetails(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            item.taxiName,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '${item.taxiType} • ${item.startLoc} to ${item.endLoc}',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: Colors.grey[600],
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '₹${item.pricePerKm.toStringAsFixed(2)} per km',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: Colors.green,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
       ),
     );
   }

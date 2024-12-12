@@ -1,4 +1,11 @@
+import 'dart:developer';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
+
+import '../model/location_model.dart';
+import '../model/taxi_type_model.dart';
+import '../model/taxilist_model.dart';
 
 class HomeCtlr extends GetxController {
   //
@@ -8,28 +15,214 @@ class HomeCtlr extends GetxController {
   var endLoc = ''.obs; // End location entered by the user
   var selectedIndex = RxInt(-1); // Default to no selection (index -1)
 
-  // List of locations
-  final List<String> locations = [
-    "Panaji",
-    "Margao",
-    "Vasco",
-    "Ponda",
-    "Calangute",
-    "Mapusa",
-    "Candolim",
-    "Colva",
-    "Panjim",
-    "Old Goa"
-  ];
-
-  // Update Start Location
-  void updateStartLoc(String value) {
-    startLoc.value = value;
+  @override
+  void onInit() async {
+    super.onInit();
+    log("Executing init");
+    await fetchLocations();
+    await fetchTaxis();
   }
 
-  // Update End Location
-  void updateEndLoc(String value) {
-    endLoc.value = value;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  // Observable list of locations
+  final RxList<LocationModel> locations = <LocationModel>[].obs;
+
+  // Observable list of taxis
+  final RxList<TaxiListModel> taxis = <TaxiListModel>[].obs;
+
+  // Observable to store taxi types for mapping
+  final RxMap<String, TaxiTypeModel> taxiTypesMap =
+      <String, TaxiTypeModel>{}.obs;
+
+  // Filter taxis based on start and end location
+  List<TaxiListModel> filterTaxis(List<TaxiListModel> taxis) {
+    // If either startLoc or endLoc is empty, return all taxis
+    if (startLoc.value.isEmpty || endLoc.value.isEmpty) {
+      return taxis;
+    }
+
+    // Otherwise, filter taxis based on both startLoc and endLoc
+    return taxis.where((taxi) {
+      final matchesStart = taxi.startLoc == startLoc.value;
+      final matchesEnd = taxi.endLoc == endLoc.value;
+      return matchesStart && matchesEnd;
+    }).toList();
+  }
+
+  // Observable to track loading state
+  final RxBool isLoading = false.obs;
+
+  // Observable for error message
+  final RxString errorMessage = ''.obs;
+
+  /// Fetch all locations from Firestore
+  Future<void> fetchLocations() async {
+    isLoading.value = true;
+    errorMessage.value = '';
+
+    try {
+      final QuerySnapshot snapshot =
+          await _firestore.collection('locations').get();
+
+      if (snapshot.docs.isEmpty) {
+        // Handle empty collection
+        locations.clear();
+        errorMessage.value = 'No locations found.';
+      } else {
+        // Parse data into models
+        locations.value = snapshot.docs
+            .map((doc) => LocationModel.fromJson(
+                doc.data() as Map<String, dynamic>, doc.id))
+            .toList();
+      }
+    } on FirebaseException catch (e) {
+      // Firestore-specific exceptions
+      errorMessage.value =
+          'Error fetching locations: ${e.message ?? 'Unknown error'}';
+    } catch (e) {
+      // Other general exceptions
+      errorMessage.value = 'An unexpected error occurred: $e';
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> fetchTaxis() async {
+    isLoading.value = true;
+    errorMessage.value = '';
+
+    try {
+      // Fetch taxi types
+      final QuerySnapshot taxiTypesSnapshot =
+          await _firestore.collection('taxiTypes').get();
+
+      if (taxiTypesSnapshot.docs.isEmpty) {
+        log('No taxi types found.');
+        errorMessage.value = 'No taxi types found.';
+        taxis.clear();
+        return;
+      }
+
+      // Map taxi types by their IDs
+      taxiTypesMap.value = {
+        for (var doc in taxiTypesSnapshot.docs)
+          doc.id:
+              TaxiTypeModel.fromJson(doc.data() as Map<String, dynamic>, doc.id)
+      };
+      log('Fetched taxiTypesMap: ${taxiTypesMap.toString()}');
+
+      // Fetch taxis
+      final QuerySnapshot taxisSnapshot =
+          await _firestore.collection('taxiList').get();
+
+      if (taxisSnapshot.docs.isEmpty) {
+        log('snapshot empty, No taxis found.');
+        errorMessage.value = 'No taxis found.';
+        taxis.clear();
+      } else {
+        log('Fetched taxis count: ${taxisSnapshot.docs.length}');
+        taxis.value = await Future.wait(taxisSnapshot.docs.map((doc) async {
+          final taxiData = doc.data() as Map<String, dynamic>;
+          log('Processing taxi data: $taxiData');
+
+          // Resolve taxiType reference
+          String? taxiTypeName;
+          double? basePricePerKm;
+          if (taxiData['taxiType'] is DocumentReference) {
+            final taxiTypeRef = taxiData['taxiType'] as DocumentReference;
+            final taxiTypeDoc = await taxiTypeRef.get();
+            if (taxiTypeDoc.exists) {
+              final taxiTypeData = TaxiTypeModel.fromJson(
+                  taxiTypeDoc.data() as Map<String, dynamic>, taxiTypeDoc.id);
+              taxiTypeName = taxiTypeData.type;
+              basePricePerKm = taxiTypeData.basePricePerKm;
+            }
+          }
+
+          // Resolve startLoc reference
+          String? startLocName;
+          if (taxiData['startLoc'] is DocumentReference) {
+            final startLocRef = taxiData['startLoc'] as DocumentReference;
+            final cachedLocation = locations.firstWhereOrNull((loc) =>
+                loc.locationId == startLocRef.id); // Check in cached locations
+            if (cachedLocation != null) {
+              startLocName = cachedLocation.locName;
+            } else {
+              final startLocDoc =
+                  await startLocRef.get(); // Fetch from Firestore
+              if (startLocDoc.exists) {
+                final locationData = LocationModel.fromJson(
+                    startLocDoc.data() as Map<String, dynamic>, startLocDoc.id);
+                startLocName = locationData.locName;
+              }
+            }
+          }
+
+          // Resolve endLoc reference
+          String? endLocName;
+          if (taxiData['endLoc'] is DocumentReference) {
+            final endLocRef = taxiData['endLoc'] as DocumentReference;
+            final cachedLocation = locations.firstWhereOrNull((loc) =>
+                loc.locationId == endLocRef.id); // Check in cached locations
+            if (cachedLocation != null) {
+              endLocName = cachedLocation.locName;
+            } else {
+              final endLocDoc = await endLocRef.get(); // Fetch from Firestore
+              if (endLocDoc.exists) {
+                final locationData = LocationModel.fromJson(
+                    endLocDoc.data() as Map<String, dynamic>, endLocDoc.id);
+                endLocName = locationData.locName;
+              }
+            }
+          }
+
+          return TaxiListModel.fromJson(
+            {
+              ...taxiData,
+              'taxiType': taxiTypeName ?? 'Unknown',
+              'basePricePerKm': basePricePerKm ?? 0.0,
+              'startLoc': startLocName ?? 'Unknown',
+              'endLoc': endLocName ?? 'Unknown',
+            },
+            doc.id,
+          );
+        }).toList());
+        log('Parsed taxis: ${taxis.toString()}');
+      }
+    } on FirebaseException catch (e) {
+      log('FirebaseException: ${e.message}');
+      errorMessage.value =
+          'Error fetching taxis: ${e.message ?? 'Unknown error'}';
+    } catch (e) {
+      log('General Exception: $e');
+      errorMessage.value = 'An unexpected error occurred: $e';
+    } finally {
+      isLoading.value = false;
+      log('Fetching taxis complete. isLoading: ${isLoading.value}');
+    }
+  }
+
+  /// Clear the data (if needed)
+  void clearDataInHomeCtlr() {
+    locations.clear();
+    errorMessage.value = '';
+    taxis.clear();
+    taxiTypesMap.clear();
+  }
+
+  void updateStartLoc(String? value) {
+    if (value != null) {
+      startLoc.value = value;
+      update();
+    }
+  }
+
+  void updateEndLoc(String? value) {
+    if (value != null) {
+      endLoc.value = value;
+      update();
+    }
   }
 
   // Reset taxi list
@@ -38,292 +231,4 @@ class HomeCtlr extends GetxController {
     startLoc.value = '';
     endLoc.value = '';
   }
-
-  // Filter taxis based on start and end location
-  List<Map<String, dynamic>> filterTaxis(List<Map<String, dynamic>> taxis) {
-    return taxis.where((taxi) {
-      final matchesStart =
-          startLoc.value.isEmpty || taxi['startLoc'] == startLoc.value;
-      final matchesEnd = endLoc.value.isEmpty || taxi['endLoc'] == endLoc.value;
-      return matchesStart && matchesEnd;
-    }).toList();
-  }
-
-  final List<Map<String, dynamic>> taxis = [
-    {
-      'id': 1,
-      'taxiName': 'Goa Cab',
-      'taxiDriverName': 'Rohan Naik',
-      'rating': 4.5,
-      'taxiType': 'SUV',
-      'startLoc': 'Panaji',
-      'endLoc': 'Margao',
-      'pricePerKm': 15.0,
-      'isAvailable': true,
-    },
-    {
-      'id': 2,
-      'taxiName': 'Beach Ride',
-      'taxiDriverName': 'Amit Desai',
-      'rating': 4.2,
-      'taxiType': 'Sedan',
-      'startLoc': 'Calangute',
-      'endLoc': 'Candolim',
-      'pricePerKm': 20.0,
-      'isAvailable': false,
-    },
-    {
-      'id': 3,
-      'taxiName': 'City Ride',
-      'taxiDriverName': 'Siddharth Patil',
-      'rating': 4.0,
-      'taxiType': 'Hatchback',
-      'startLoc': 'Vasco',
-      'endLoc': 'Ponda',
-      'pricePerKm': 12.0,
-      'isAvailable': true,
-    },
-    {
-      'id': 4,
-      'taxiName': 'Airport Express',
-      'taxiDriverName': 'Rajesh Kamat',
-      'rating': 4.8,
-      'taxiType': 'Sedan',
-      'startLoc': 'Dabolim Airport',
-      'endLoc': 'Panaji',
-      'pricePerKm': 18.0,
-      'isAvailable': true,
-    },
-    {
-      'id': 5,
-      'taxiName': 'Hilltop Shuttle',
-      'taxiDriverName': 'Swapnil Sawant',
-      'rating': 4.5,
-      'taxiType': 'Van',
-      'startLoc': 'Mapusa',
-      'endLoc': 'Anjuna',
-      'pricePerKm': 25.0,
-      'isAvailable': false,
-    },
-    {
-      'id': 6,
-      'taxiName': 'South Goa Ride',
-      'taxiDriverName': 'Ganesh Parab',
-      'rating': 4.2,
-      'taxiType': 'SUV',
-      'startLoc': 'Margao',
-      'endLoc': 'Cavelossim',
-      'pricePerKm': 22.0,
-      'isAvailable': true,
-    },
-    {
-      'id': 7,
-      'taxiName': 'Coastal Explorer',
-      'taxiDriverName': 'John D\'Souza',
-      'rating': 4.3,
-      'taxiType': 'Hatchback',
-      'startLoc': 'Arambol',
-      'endLoc': 'Morjim',
-      'pricePerKm': 16.0,
-      'isAvailable': true,
-    },
-    {
-      'id': 8,
-      'taxiName': 'Candolim Comfort',
-      'taxiDriverName': 'Alisha Rodrigues',
-      'rating': 4.1,
-      'taxiType': 'Sedan',
-      'startLoc': 'Candolim',
-      'endLoc': 'Baga',
-      'pricePerKm': 17.5,
-      'isAvailable': false,
-    },
-    {
-      'id': 9,
-      'taxiName': 'Night Owl Cab',
-      'taxiDriverName': 'Nandini Gaunekar',
-      'rating': 4.6,
-      'taxiType': 'SUV',
-      'startLoc': 'Panjim',
-      'endLoc': 'Old Goa',
-      'pricePerKm': 19.0,
-      'isAvailable': true,
-    },
-    {
-      'id': 10,
-      'taxiName': 'Sunset Taxi',
-      'taxiDriverName': 'Vivek Chari',
-      'rating': 4.4,
-      'taxiType': 'Sedan',
-      'startLoc': 'Palolem',
-      'endLoc': 'Colva',
-      'pricePerKm': 21.0,
-      'isAvailable': true,
-    },
-    {
-      'id': 11,
-      'taxiName': 'Adventure Ride',
-      'taxiDriverName': 'Ravi Dhuri',
-      'rating': 4.2,
-      'taxiType': 'Van',
-      'startLoc': 'Ponda',
-      'endLoc': 'Dudhsagar Falls',
-      'pricePerKm': 23.0,
-      'isAvailable': false,
-    },
-    {
-      'id': 12,
-      'taxiName': 'Forest Trek Cab',
-      'taxiDriverName': 'Amit Desai',
-      'rating': 4.7,
-      'taxiType': 'SUV',
-      'startLoc': 'Canacona',
-      'endLoc': 'Agonda',
-      'pricePerKm': 25.0,
-      'isAvailable': true,
-    },
-    {
-      'id': 13,
-      'taxiName': 'Express Lane',
-      'taxiDriverName': 'Meera Naik',
-      'rating': 4.5,
-      'taxiType': 'Sedan',
-      'startLoc': 'Calangute',
-      'endLoc': 'Vasco',
-      'pricePerKm': 18.0,
-      'isAvailable': true,
-    },
-    {
-      'id': 14,
-      'taxiName': 'Swift Cab',
-      'taxiDriverName': 'Ganesh Parab',
-      'rating': 4.3,
-      'taxiType': 'Hatchback',
-      'startLoc': 'Candolim',
-      'endLoc': 'Margao',
-      'pricePerKm': 20.0,
-      'isAvailable': true,
-    },
-    {
-      'id': 15,
-      'taxiName': 'Eco Ride',
-      'taxiDriverName': 'Anand Patil',
-      'rating': 4.2,
-      'taxiType': 'SUV',
-      'startLoc': 'Arambol',
-      'endLoc': 'Panjim',
-      'pricePerKm': 22.0,
-      'isAvailable': true,
-    },
-    {
-      'id': 16,
-      'taxiName': 'Riverfront Cab',
-      'taxiDriverName': 'Prakash Kamat',
-      'rating': 4.8,
-      'taxiType': 'Sedan',
-      'startLoc': 'Mapusa',
-      'endLoc': 'Old Goa',
-      'pricePerKm': 24.0,
-      'isAvailable': true,
-    },
-    {
-      'id': 17,
-      'taxiName': 'Mountain Shuttle',
-      'taxiDriverName': 'Yashwant Sawant',
-      'rating': 4.6,
-      'taxiType': 'Van',
-      'startLoc': 'Dabolim Airport',
-      'endLoc': 'Candolim',
-      'pricePerKm': 30.0,
-      'isAvailable': false,
-    },
-    {
-      'id': 18,
-      'taxiName': 'Golden Ride',
-      'taxiDriverName': 'Krishna Faleiro',
-      'rating': 4.4,
-      'taxiType': 'Hatchback',
-      'startLoc': 'Margao',
-      'endLoc': 'Baga',
-      'pricePerKm': 18.0,
-      'isAvailable': true,
-    },
-    {
-      'id': 19,
-      'taxiName': 'Seaside Taxi',
-      'taxiDriverName': 'Rahul Borkar',
-      'rating': 4.7,
-      'taxiType': 'SUV',
-      'startLoc': 'Colva',
-      'endLoc': 'Anjuna',
-      'pricePerKm': 21.0,
-      'isAvailable': true,
-    },
-    {
-      'id': 20,
-      'taxiName': 'Heritage Cab',
-      'taxiDriverName': 'Alok Rane',
-      'rating': 4.5,
-      'taxiType': 'Sedan',
-      'startLoc': 'Panjim',
-      'endLoc': 'Dudhsagar Falls',
-      'pricePerKm': 28.0,
-      'isAvailable': true,
-    },
-    {
-      'id': 21,
-      'taxiName': 'Lagoon Shuttle',
-      'taxiDriverName': 'Sonia Naik',
-      'rating': 4.6,
-      'taxiType': 'SUV',
-      'startLoc': 'Morjim',
-      'endLoc': 'Palolem',
-      'pricePerKm': 26.0,
-      'isAvailable': false,
-    },
-    {
-      'id': 22,
-      'taxiName': 'Adventure Taxi',
-      'taxiDriverName': 'Vaibhav Gaonkar',
-      'rating': 4.3,
-      'taxiType': 'Van',
-      'startLoc': 'Canacona',
-      'endLoc': 'Mapusa',
-      'pricePerKm': 22.0,
-      'isAvailable': true,
-    },
-    {
-      'id': 23,
-      'taxiName': 'Urban Explorer',
-      'taxiDriverName': 'Nikita Keni',
-      'rating': 4.5,
-      'taxiType': 'Hatchback',
-      'startLoc': 'Old Goa',
-      'endLoc': 'Candolim',
-      'pricePerKm': 19.0,
-      'isAvailable': true,
-    },
-    {
-      'id': 24,
-      'taxiName': 'Western Cab',
-      'taxiDriverName': 'Samarth Gaonkar',
-      'rating': 4.7,
-      'taxiType': 'Sedan',
-      'startLoc': 'Ponda',
-      'endLoc': 'Colva',
-      'pricePerKm': 20.0,
-      'isAvailable': true,
-    },
-    {
-      'id': 25,
-      'taxiName': 'Paradise Ride',
-      'taxiDriverName': 'Divya Naik',
-      'rating': 4.2,
-      'taxiType': 'SUV',
-      'startLoc': 'Baga',
-      'endLoc': 'Calangute',
-      'pricePerKm': 16.0,
-      'isAvailable': true,
-    },
-  ];
 }

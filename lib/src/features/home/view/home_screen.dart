@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ogtaxi/constants/sizes.dart';
@@ -5,6 +7,7 @@ import 'package:ogtaxi/constants/strings.dart';
 import 'package:ogtaxi/extensions/esizedbox.dart';
 import 'package:ogtaxi/repo/auth/auth_repo.dart';
 import 'package:ogtaxi/src/features/home/controller/home.dart';
+import 'package:ogtaxi/src/features/home/model/taxilist_model.dart';
 import 'package:ogtaxi/src/features/home/view/most_searched_widget.dart';
 import 'package:ogtaxi/utils/theme/app_colors.dart';
 
@@ -76,59 +79,86 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: ListView(
-        shrinkWrap: true,
+      body: Padding(
         padding: const EdgeInsets.all(KSizes.k8pad),
-        children: [
-          Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Esb.height(KSizes.k18pad),
-              Text("Hi, John.", style: txtTheme.headlineMedium),
-              Esb.height(KSizes.k4pad),
-              Text("Enter locations to see taxis", style: txtTheme.bodyLarge),
-              Esb.height(KSizes.k16pad),
-              Text("Most Searched", style: txtTheme.bodyMedium),
-              Esb.height(KSizes.k4pad),
-              SizedBox(
-                height: 64,
-                child: MostSearchedWidget(ctlr: ctlr),
-              ),
-              Esb.height(KSizes.k8pad),
-              SearchTaxi(ctlr: ctlr),
-              Esb.height(KSizes.k8pad),
-              Obx(() {
-                final filteredTaxis = ctlr.filterTaxis(ctlr.taxis);
-                return filteredTaxis.isEmpty
-                    ? const Center(child: Text('No results found.'))
-                    : ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: filteredTaxis.length,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemBuilder: (context, index) {
-                          final taxi = filteredTaxis[index];
-                          return TaxiCard(
-                            imageUrl: taxi['imageUrl'] ??
-                                'https://via.placeholder.com/80',
-                            taxiName: taxi['taxiName'] ?? 'Unknown Taxi',
-                            isAvailable: taxi['isAvailable'] ?? false,
-                            taxiType: taxi['taxiType'] ?? 'Unknown Type',
-                            pricePerKm: taxi['pricePerKm'] ?? 0.0,
-                            startLoc: taxi['startLoc'] ?? 'Unknown',
-                            endLoc: taxi['endLoc'] ?? 'Unknown',
-                            rating: double.tryParse(
-                                    taxi['rating']?.toString() ?? '0.0') ??
-                                0.0,
-                          );
-                        },
-                      );
-              }),
-            ],
-          ),
-        ],
+        child: Obx(
+          () {
+            final isLoading = ctlr.isLoading.value;
+            final filteredTaxis = ctlr.filterTaxis(ctlr.taxis);
+            log("Taxi list: ${ctlr.taxis.length}");
+
+            if (isLoading) {
+              return const Center(
+                child: SizedBox(
+                  height: 44,
+                  width: 44,
+                  child: CircularProgressIndicator.adaptive(),
+                ),
+              );
+            }
+
+            return ListView(
+              shrinkWrap: true,
+              physics: const BouncingScrollPhysics(),
+              children: [
+                _buildHeaderSection(context),
+                Esb.height(KSizes.k16pad),
+                _buildMostSearchedSection(ctlr),
+                Esb.height(KSizes.k8pad),
+                SearchTaxi(ctlr: ctlr),
+                Esb.height(KSizes.k8pad),
+                _buildTaxiListSection(filteredTaxis),
+              ],
+            );
+          },
+        ),
       ),
+    );
+  }
+
+  Widget _buildHeaderSection(BuildContext context) {
+    final txtTheme = Theme.of(context).textTheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Esb.height(KSizes.k18pad),
+        Text("Hi, John.", style: txtTheme.headlineMedium),
+        Esb.height(KSizes.k4pad),
+        Text("Enter locations to see taxis", style: txtTheme.bodyLarge),
+      ],
+    );
+  }
+
+  Widget _buildMostSearchedSection(HomeCtlr ctlr) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text("Most Searched", style: Get.textTheme.bodyMedium),
+        Esb.height(KSizes.k4pad),
+        SizedBox(
+          height: 64,
+          child: MostSearchedWidget(ctlr: ctlr),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTaxiListSection(List<TaxiListModel> filteredTaxis) {
+    if (filteredTaxis.isEmpty) {
+      return const Center(
+        child: Text('No results found.'),
+      );
+    }
+
+    return ListView.builder(
+      shrinkWrap: true,
+      itemCount: filteredTaxis.length,
+      physics: const NeverScrollableScrollPhysics(),
+      itemBuilder: (context, index) {
+        final taxi = filteredTaxis[index];
+        return TaxiCard(item: taxi);
+      },
     );
   }
 }

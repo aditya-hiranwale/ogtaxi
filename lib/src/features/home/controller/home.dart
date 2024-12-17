@@ -44,8 +44,10 @@ class HomeCtlr extends GetxController {
 
     // Otherwise, filter taxis based on both startLoc and endLoc
     return taxis.where((taxi) {
-      final matchesStart = taxi.startLoc == startLoc.value;
-      final matchesEnd = taxi.endLoc == endLoc.value;
+      final matchesStart = taxi.startLoc.toLowerCase().trim() ==
+          startLoc.value.toLowerCase().trim();
+      final matchesEnd =
+          taxi.endLoc.toLowerCase().trim() == endLoc.value.toLowerCase().trim();
       return matchesStart && matchesEnd;
     }).toList();
   }

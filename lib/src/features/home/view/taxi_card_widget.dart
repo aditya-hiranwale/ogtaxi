@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:get/get.dart';
 import 'package:ogtaxi/src/features/home/model/taxilist_model.dart';
+import 'package:ogtaxi/src/features/home/view/taxi_detail_screen.dart';
 
 class TaxiCard extends StatelessWidget {
   final TaxiListModel item;
@@ -12,22 +14,25 @@ class TaxiCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-      color: Colors.grey.shade100,
-      elevation: 4.0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12.0),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Row(
-          children: [
-            _buildTaxiImage(),
-            const SizedBox(width: 16),
-            _buildTaxiDetails(context),
-            AvailabilityBadge(isAvailable: item.isAvailable),
-          ],
+    return GestureDetector(
+      onTap: () => Get.to(() => TaxiDetailScreen(item: item)),
+      child: Card(
+        margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+        color: Colors.grey.shade100,
+        elevation: 4.0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.0),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Row(
+            children: [
+              _buildTaxiImage(),
+              const SizedBox(width: 16),
+              _buildTaxiDetails(context),
+              AvailabilityBadge(isAvailable: item.isAvailable),
+            ],
+          ),
         ),
       ),
     );

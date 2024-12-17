@@ -116,6 +116,24 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget _buildTaxiListSection(List<TaxiListModel> filteredTaxis) {
+    if (filteredTaxis.isEmpty) {
+      return const Center(
+        child: Text('No results found.'),
+      );
+    }
+
+    return ListView.builder(
+      shrinkWrap: true,
+      itemCount: filteredTaxis.length,
+      physics: const NeverScrollableScrollPhysics(),
+      itemBuilder: (context, index) {
+        final taxi = filteredTaxis[index];
+        return TaxiCard(item: taxi);
+      },
+    );
+  }
+
   Widget _buildHeaderSection(BuildContext context) {
     final txtTheme = Theme.of(context).textTheme;
 
@@ -141,24 +159,6 @@ class _HomeScreenState extends State<HomeScreen> {
           child: MostSearchedWidget(ctlr: ctlr),
         ),
       ],
-    );
-  }
-
-  Widget _buildTaxiListSection(List<TaxiListModel> filteredTaxis) {
-    if (filteredTaxis.isEmpty) {
-      return const Center(
-        child: Text('No results found.'),
-      );
-    }
-
-    return ListView.builder(
-      shrinkWrap: true,
-      itemCount: filteredTaxis.length,
-      physics: const NeverScrollableScrollPhysics(),
-      itemBuilder: (context, index) {
-        final taxi = filteredTaxis[index];
-        return TaxiCard(item: taxi);
-      },
     );
   }
 }
